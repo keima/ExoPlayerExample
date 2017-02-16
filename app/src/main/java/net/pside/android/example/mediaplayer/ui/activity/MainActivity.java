@@ -4,9 +4,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -36,9 +34,7 @@ import net.pside.android.example.mediaplayer.util.ExoPlayerUtil;
 import java.io.IOException;
 
 import butterknife.BindView;
-import butterknife.BindViews;
 import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
 import butterknife.OnClick;
 import timber.log.Timber;
 
@@ -50,11 +46,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.debugText)
     TextView debugText;
 
-    @BindViews({R.id.playerViewOne, R.id.playerViewTwo})
-    SimpleExoPlayerView[] playerViews;
-
-    @BindViews({R.id.toggleButtonOne, R.id.toggleButtonTwo})
-    ToggleButton[] toggleButtons;
+    @BindView(R.id.playerView)
+    SimpleExoPlayerView playerView;
 
     private SimpleExoPlayer exoPlayer;
 
@@ -127,8 +120,6 @@ public class MainActivity extends AppCompatActivity {
             LoadControl loadControl = new DefaultLoadControl();
             exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
         }
-        togglePlayer(0, true);
-        togglePlayer(1, true);
 
         exoPlayer.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -172,17 +163,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.readyButton)
-    void onClickReady() {
+    @OnClick(R.id.button1)
+    void onClickButton1() {
         String ua = Util.getUserAgent(this, EXO_PLAYER_USER_AGENT);
         Uri manifestUri = Uri.parse(URL_HLS_CONTENT);
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, ua, bandwidthMeter);
 
-//        MediaSource[] mediaSources = new MediaSource[2];
-        MediaSource[] msChild1 = new MediaSource[1];
-//        MediaSource[] msChild2 = new MediaSource[1];
-
-        msChild1[0] = new HlsMediaSource(manifestUri, dataSourceFactory, mainHandler, new AdaptiveMediaSourceEventListener() {
+        MediaSource mediaSource = new HlsMediaSource(manifestUri, dataSourceFactory, mainHandler, new AdaptiveMediaSourceEventListener() {
             @Override
             public void onLoadStarted(DataSpec dataSpec, int dataType, int trackType, Format trackFormat, int trackSelectionReason, Object trackSelectionData, long mediaStartTimeMs, long mediaEndTimeMs, long elapsedRealtimeMs) {
                 Timber.d("> onLoadStarted: ");
@@ -213,40 +200,19 @@ public class MainActivity extends AppCompatActivity {
                 Timber.d("> onDownstreamFormatChanged: ");
             }
         });
-//        msChild1[1] = new HlsMediaSource(manifestUri, dataSourceFactory, null, null);
-//        mediaSources[0] = new ConcatenatingMediaSource(msChild1);
-//
-//        msChild2[0] = new HlsMediaSource(manifestUri, dataSourceFactory, null, null);
-//        mediaSources[1] = new ConcatenatingMediaSource(msChild2);
 
-        exoPlayer.prepare(new ConcatenatingMediaSource(msChild1));
+        exoPlayer.prepare(new ConcatenatingMediaSource(mediaSource));
+//        exoPlayer.prepare(mediaSource);
     }
 
-    @OnCheckedChanged({R.id.toggleButtonOne, R.id.toggleButtonTwo})
-    void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        SimpleExoPlayerView view;
-        String playerName;
-
-        switch (buttonView.getId()) {
-            case R.id.toggleButtonOne:
-                view = playerViews[0];
-                playerName = "One";
-                break;
-            case R.id.toggleButtonTwo:
-                view = playerViews[1];
-                playerName = "Two";
-                break;
-            default:
-                return;
-        }
-
-        view.setPlayer(isChecked ? exoPlayer : null);
-        Timber.d("onCheckedChanged: %s: %b", playerName, isChecked);
+    @OnClick(R.id.button2)
+    void onClickButton2() {
+        playerView.setPlayer(exoPlayer);
     }
 
-    private void togglePlayer(int index, boolean isActive) {
-        // ToggleButtonのstatusを変化させると対応するイベントが発火するという仕掛け
-        toggleButtons[index].setChecked(isActive);
+    @OnClick(R.id.button3)
+    void onClickButton3() {
+        playerView.setPlayer(null);
     }
 
     private void handleMessageAction() {

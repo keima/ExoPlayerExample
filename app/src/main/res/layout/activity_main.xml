@@ -21,42 +21,33 @@
         tools:text="12345 / 12345"/>
 
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
-        android:id="@+id/playerViewOne"
+        android:id="@+id/playerView"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        app:use_controller="true" />
-
-    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
-        android:id="@+id/playerViewTwo"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         app:use_controller="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <Button
-            android:id="@+id/readyButton"
+            android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Ready" />
+            android:text="[1] Prepare" />
 
-        <ToggleButton
-            android:id="@+id/toggleButtonOne"
+        <Button
+            android:id="@+id/button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="One" />
+            android:text="[2] setPlayer(player)" />
 
-        <ToggleButton
-            android:id="@+id/toggleButtonTwo"
+        <Button
+            android:id="@+id/button3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Two" />
+            android:text="[3] setPlayer(null)" />
     </LinearLayout>
 
 </LinearLayout>
