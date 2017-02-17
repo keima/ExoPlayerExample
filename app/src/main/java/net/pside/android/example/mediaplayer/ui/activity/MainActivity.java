@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -20,8 +21,8 @@ import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     SimpleExoPlayerView playerView;
 
     private SimpleExoPlayer exoPlayer;
+    private DefaultTrackSelector trackSelector;
 
     private Handler mainHandler;
     private DefaultBandwidthMeter bandwidthMeter;
@@ -110,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 //            AdaptiveVideoTrackSelection.Factory trackSelection = new AdaptiveVideoTrackSelection.Factory(bandwidthMeter);
 //            TrackSelector trackSelector = new DefaultTrackSelector(mainHandler/*, trackSelection*/);
 //            TODO: r2.0.2には存在している、 r2.1.1はここで定義しない
-            TrackSelector trackSelector = new DefaultTrackSelector();
+            trackSelector = new DefaultTrackSelector();
 //            trackSelector.addListener(new TrackSelector.EventListener() {
 //                @Override
 //                public void onTrackSelectionsChanged(TrackSelections trackSelections) {
@@ -208,11 +210,42 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.button2)
     void onClickButton2() {
         playerView.setPlayer(exoPlayer);
+        setVideoTrackDisabled(false);
     }
 
     @OnClick(R.id.button3)
     void onClickButton3() {
         playerView.setPlayer(null);
+        setVideoTrackDisabled(true);
+    }
+
+    private void setVideoTrackDisabled(boolean status) {
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = trackSelector.getCurrentMappedTrackInfo();
+        if (mappedTrackInfo == null) {
+            return;
+        }
+
+        int rendererIndex = -1;
+        for (int i = 0; i < mappedTrackInfo.length; i++) {
+            // TODO: trackGroups使わないかも
+            TrackGroupArray trackGroups = mappedTrackInfo.getTrackGroups(i);
+            if (trackGroups.length > 0) {
+                Timber.d("setVideoTrackStatus: rendererType(%d): %d", i, exoPlayer.getRendererType(i));
+                if (exoPlayer.getRendererType(i) == C.TRACK_TYPE_VIDEO) {
+                    rendererIndex = i;
+                }
+            }
+        }
+
+        if (rendererIndex == -1) {
+            Timber.w("setVideoTrackStatus: rendererIndex == -1");
+            return;
+        }
+
+        Timber.d("setVideoTrackStatus: getRendererDisabled(%d) = %b", rendererIndex, status);
+        Timber.d("setVideoTrackStatus: setRendererDisabled(%d, %b)", rendererIndex, status);
+        trackSelector.setRendererDisabled(rendererIndex, status);
+
     }
 
     private void handleMessageAction() {
