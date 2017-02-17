@@ -210,13 +210,21 @@ public class MainActivity extends AppCompatActivity {
     @OnClick(R.id.button2)
     void onClickButton2() {
         playerView.setPlayer(exoPlayer);
-        setVideoTrackDisabled(false);
     }
 
     @OnClick(R.id.button3)
     void onClickButton3() {
         playerView.setPlayer(null);
+    }
+
+    @OnClick(R.id.button4)
+    void onClickButton4() {
         setVideoTrackDisabled(true);
+    }
+
+    @OnClick(R.id.button5)
+    void onClickButton5() {
+        setVideoTrackDisabled(false);
     }
 
     private void setVideoTrackDisabled(boolean status) {
@@ -242,10 +250,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        Timber.d("setVideoTrackStatus: getRendererDisabled(%d) = %b", rendererIndex, status);
+        Timber.d("setVideoTrackStatus: getRendererDisabled(%d) = %b", rendererIndex, trackSelector.getRendererDisabled(rendererIndex));
         Timber.d("setVideoTrackStatus: setRendererDisabled(%d, %b)", rendererIndex, status);
         trackSelector.setRendererDisabled(rendererIndex, status);
-
     }
 
     private void handleMessageAction() {

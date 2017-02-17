@@ -48,6 +48,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="[3] setPlayer(null)" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[A] setRendererDisabled(true)"/>
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[A] setRendererDisabled(false)"/>
     </LinearLayout>
 
 </LinearLayout>
