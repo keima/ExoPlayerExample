@@ -1,9 +1,12 @@
 package net.pside.android.example.mediaplayer.ui.activity;
 
+import android.databinding.DataBindingUtil;
+import android.databinding.ViewDataBinding;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -31,30 +34,18 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import net.pside.android.example.mediaplayer.R;
+import net.pside.android.example.mediaplayer.databinding.ActivityMainBinding;
 import net.pside.android.example.mediaplayer.util.ExoPlayerUtil;
 
 import java.io.IOException;
 
-import butterknife.BindView;
-import butterknife.BindViews;
-import butterknife.ButterKnife;
-import butterknife.OnCheckedChanged;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXO_PLAYER_USER_AGENT = "mediaplayer-example";
-    public static final String URL_HLS_CONTENT = "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8";
-
-    @BindView(R.id.debugText)
-    TextView debugText;
-
-    @BindViews({R.id.playerViewOne, R.id.playerViewTwo})
-    SimpleExoPlayerView[] playerViews;
-
-    @BindViews({R.id.toggleButtonOne, R.id.toggleButtonTwo})
-    ToggleButton[] toggleButtons;
+//    public static final String URL_HLS_CONTENT = "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8";
+    public static final String URL_HLS_CONTENT = "https://video-dev.github.io/streams/x36xhzz/x36xhzz.m3u8";
 
     private SimpleExoPlayer exoPlayer;
 
@@ -68,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private ActivityMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding.setActivity(this);
 
         mainHandler = new Handler();
         bandwidthMeter = new DefaultBandwidthMeter();
@@ -127,8 +120,6 @@ public class MainActivity extends AppCompatActivity {
             LoadControl loadControl = new DefaultLoadControl();
             exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
         }
-        togglePlayer(0, true);
-        togglePlayer(1, true);
 
         exoPlayer.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -172,8 +163,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick(R.id.readyButton)
-    void onClickReady() {
+    public void onClickReady(View view) {
+        Timber.d("onClickReady");
         String ua = Util.getUserAgent(this, EXO_PLAYER_USER_AGENT);
         Uri manifestUri = Uri.parse(URL_HLS_CONTENT);
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, ua, bandwidthMeter);
@@ -200,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLoadError(DataSpec dataSpec, int dataType, int trackType, Format trackFormat, int trackSelectionReason, Object trackSelectionData, long mediaStartTimeMs, long mediaEndTimeMs, long elapsedRealtimeMs, long loadDurationMs, long bytesLoaded, IOException error, boolean wasCanceled) {
-                Timber.d("> onLoadError: ");
+                Timber.d(error, "> onLoadError: ");
             }
 
             @Override
@@ -222,18 +213,19 @@ public class MainActivity extends AppCompatActivity {
         exoPlayer.prepare(new ConcatenatingMediaSource(msChild1));
     }
 
-    @OnCheckedChanged({R.id.toggleButtonOne, R.id.toggleButtonTwo})
-    void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        Timber.d("onCheckedChanged: " + buttonView.getId());
+
         SimpleExoPlayerView view;
         String playerName;
 
         switch (buttonView.getId()) {
             case R.id.toggleButtonOne:
-                view = playerViews[0];
+                view = binding.playerViewOne;
                 playerName = "One";
                 break;
             case R.id.toggleButtonTwo:
-                view = playerViews[1];
+                view = binding.playerViewTwo;
                 playerName = "Two";
                 break;
             default:
@@ -244,16 +236,11 @@ public class MainActivity extends AppCompatActivity {
         Timber.d("onCheckedChanged: %s: %b", playerName, isChecked);
     }
 
-    private void togglePlayer(int index, boolean isActive) {
-        // ToggleButtonのstatusを変化させると対応するイベントが発火するという仕掛け
-        toggleButtons[index].setChecked(isActive);
-    }
-
     private void handleMessageAction() {
         long duration = exoPlayer == null ? 0 : exoPlayer.getDuration();
         long position = exoPlayer == null ? 0 : exoPlayer.getCurrentPosition();
 
-        debugText.setText(String.format("%d / %d", position, duration));
+        binding.debugText.setText(String.format("%d / %d", position, duration));
 
         mainHandler.postDelayed(debugMessageRunnable, 1000);
     }
