@@ -28,13 +28,13 @@
             android:gravity="center"
             tools:text="12345 / 12345" />
 
-        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/playerViewOne"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             app:use_controller="true" />
 
-        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/playerViewTwo"
             android:layout_width="match_parent"
             android:layout_height="300dp"
